@@ -16,8 +16,9 @@
  */
 package org.apache.dubbo.common.bytecode;
 
-import junit.framework.TestCase;
-import org.junit.Test;
+import org.apache.dubbo.common.utils.ReflectUtils;
+
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -28,7 +29,7 @@ interface Builder<T> {
     void setName(Bean bean, T name);
 }
 
-public class ClassGeneratorTest extends TestCase {
+public class ClassGeneratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
@@ -36,7 +37,7 @@ public class ClassGeneratorTest extends TestCase {
         Bean b = new Bean();
         Field fname = null, fs[] = Bean.class.getDeclaredFields();
         for (Field f : fs) {
-            f.setAccessible(true);
+            ReflectUtils.makeAccessible(f);
             if (f.getName().equals("name"))
                 fname = f;
         }
@@ -66,7 +67,7 @@ public class ClassGeneratorTest extends TestCase {
         Bean b = new Bean();
         Field fname = null, fs[] = Bean.class.getDeclaredFields();
         for (Field f : fs) {
-            f.setAccessible(true);
+            ReflectUtils.makeAccessible(f);
             if (f.getName().equals("name"))
                 fname = f;
         }

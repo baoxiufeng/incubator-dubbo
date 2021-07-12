@@ -16,12 +16,13 @@
  */
 package org.apache.dubbo.common.bytecode;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class WrapperTest {
     @Test
@@ -63,53 +64,76 @@ public class WrapperTest {
     @Test
     public void testHasMethod() throws Exception {
         Wrapper w = Wrapper.getWrapper(I1.class);
-        Assert.assertTrue(w.hasMethod("setName"));
-        Assert.assertTrue(w.hasMethod("hello"));
-        Assert.assertTrue(w.hasMethod("showInt"));
-        Assert.assertTrue(w.hasMethod("getFloat"));
-        Assert.assertTrue(w.hasMethod("setFloat"));
-        Assert.assertFalse(w.hasMethod("setFloatXXX"));
+        Assertions.assertTrue(w.hasMethod("setName"));
+        Assertions.assertTrue(w.hasMethod("hello"));
+        Assertions.assertTrue(w.hasMethod("showInt"));
+        Assertions.assertTrue(w.hasMethod("getFloat"));
+        Assertions.assertTrue(w.hasMethod("setFloat"));
+        Assertions.assertFalse(w.hasMethod("setFloatXXX"));
     }
 
     @Test
     public void testWrapperObject() throws Exception {
         Wrapper w = Wrapper.getWrapper(Object.class);
-        Assert.assertTrue(w.getMethodNames().length == 4);
-        Assert.assertTrue(w.getPropertyNames().length == 0);
-        Assert.assertEquals(null, w.getPropertyType(null));
+        Assertions.assertEquals(4, w.getMethodNames().length);
+        Assertions.assertEquals(0, w.getPropertyNames().length);
+        Assertions.assertNull(w.getPropertyType(null));
     }
 
-    @Test(expected = NoSuchPropertyException.class)
+    @Test
     public void testGetPropertyValue() throws Exception {
-        Wrapper w = Wrapper.getWrapper(Object.class);
-        w.getPropertyValue(null, null);
+        Assertions.assertThrows(NoSuchPropertyException.class, () -> {
+            Wrapper w = Wrapper.getWrapper(Object.class);
+            w.getPropertyValue(null, null);
+        });
     }
 
-    @Test(expected = NoSuchPropertyException.class)
+    @Test
     public void testSetPropertyValue() throws Exception {
-        Wrapper w = Wrapper.getWrapper(Object.class);
-        w.setPropertyValue(null, null, null);
+        Assertions.assertThrows(NoSuchPropertyException.class, () -> {
+            Wrapper w = Wrapper.getWrapper(Object.class);
+            w.setPropertyValue(null, null, null);
+        });
     }
 
     @Test
     public void testInvokeWrapperObject() throws Exception {
         Wrapper w = Wrapper.getWrapper(Object.class);
         Object instance = new Object();
-        Assert.assertEquals(instance.getClass(), (Class<?>) w.invokeMethod(instance, "getClass", null, null));
-        Assert.assertEquals(instance.hashCode(), (int) w.invokeMethod(instance, "hashCode", null, null));
-        Assert.assertEquals(instance.toString(), (String) w.invokeMethod(instance, "toString", null, null));
-        Assert.assertEquals(true, (boolean) w.invokeMethod(instance, "equals", null, new Object[]{instance}));
+        Assertions.assertEquals(instance.getClass(), (Class<?>) w.invokeMethod(instance, "getClass", null, null));
+        Assertions.assertEquals(instance.hashCode(), (int) w.invokeMethod(instance, "hashCode", null, null));
+        Assertions.assertEquals(instance.toString(), (String) w.invokeMethod(instance, "toString", null, null));
+        Assertions.assertTrue((boolean)w.invokeMethod(instance, "equals", null, new Object[] {instance}));
     }
 
-    @Test(expected = NoSuchMethodException.class)
+    @Test
     public void testNoSuchMethod() throws Exception {
-        Wrapper w = Wrapper.getWrapper(Object.class);
-        w.invokeMethod(new Object(), "__XX__", null, null);
+        Assertions.assertThrows(NoSuchMethodException.class, () -> {
+            Wrapper w = Wrapper.getWrapper(Object.class);
+            w.invokeMethod(new Object(), "__XX__", null, null);
+        });
     }
 
-    /**
-     * see http://code.alibabatech.com/jira/browse/DUBBO-571
-     */
+    @Test
+    public void testOverloadMethod() throws Exception {
+        Wrapper w = Wrapper.getWrapper(I2.class);
+        assertEquals(2, w.getMethodNames().length);
+
+        Impl2 impl = new Impl2();
+
+        w.invokeMethod(impl, "setFloat", new Class[]{float.class}, new Object[]{1F});
+        assertEquals(1F, impl.getFloat1());
+        assertNull(impl.getFloat2());
+
+        w.invokeMethod(impl, "setFloat", new Class[]{Float.class}, new Object[]{2f});
+        assertEquals(1F, impl.getFloat1());
+        assertEquals(2F, impl.getFloat2());
+
+        w.invokeMethod(impl, "setFloat", new Class[]{Float.class}, new Object[]{null});
+        assertEquals(1F, impl.getFloat1());
+        assertNull(impl.getFloat2());
+    }
+
     @Test
     public void test_getDeclaredMethodNames_ContainExtendsParentMethods() throws Exception {
         assertArrayEquals(new String[]{"hello",}, Wrapper.getWrapper(Parent1.class).getMethodNames());
@@ -117,19 +141,16 @@ public class WrapperTest {
         assertArrayEquals(new String[]{}, Wrapper.getWrapper(Son.class).getDeclaredMethodNames());
     }
 
-    /**
-     * see http://code.alibabatech.com/jira/browse/DUBBO-571
-     */
     @Test
     public void test_getMethodNames_ContainExtendsParentMethods() throws Exception {
         assertArrayEquals(new String[]{"hello", "world"}, Wrapper.getWrapper(Son.class).getMethodNames());
     }
 
-    public static interface I0 {
+    public interface I0 {
         String getName();
     }
 
-    public static interface I1 extends I0 {
+    public interface I1 extends I0 {
         void setName(String name);
 
         void hello(String name);
@@ -141,19 +162,25 @@ public class WrapperTest {
         void setFloat(float f);
     }
 
-    public static interface EmptyService {
+    public interface I2 {
+        void setFloat(float f);
+
+        void setFloat(Float f);
     }
 
-    public static interface Parent1 {
+    public interface EmptyService {
+    }
+
+    public interface Parent1 {
         void hello();
     }
 
 
-    public static interface Parent2 {
+    public interface Parent2 {
         void world();
     }
 
-    public static interface Son extends Parent1, Parent2 {
+    public interface Son extends Parent1, Parent2 {
 
     }
 
@@ -188,6 +215,29 @@ public class WrapperTest {
 
         public void setFloat(float f) {
             fv = f;
+        }
+    }
+
+    public static class Impl2 implements I2 {
+        private float float1;
+        private Float float2;
+
+        @Override
+        public void setFloat(float f) {
+            this.float1 = f;
+        }
+
+        @Override
+        public void setFloat(Float f) {
+            this.float2 = f;
+        }
+
+        public float getFloat1() {
+            return float1;
+        }
+
+        public Float getFloat2() {
+            return float2;
         }
     }
 

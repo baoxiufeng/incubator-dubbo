@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JavaCodeTest {
 
-    public final static AtomicInteger SUBFIX = new AtomicInteger(8);
+    public static final AtomicInteger SUBFIX = new AtomicInteger(8);
 
     String getSimpleCode() {
         StringBuilder code = new StringBuilder();
@@ -34,7 +34,7 @@ public class JavaCodeTest {
         return code.toString();
     }
 
-    String getSimleCodeWithoutPackage(){
+    String getSimpleCodeWithoutPackage(){
         StringBuilder code = new StringBuilder();
         code.append("public class HelloServiceImpl" + SUBFIX.getAndIncrement() + "implements org.apache.dubbo.common.compiler.support.HelloService.HelloService {");
         code.append("   public String sayHello() { ");
@@ -44,7 +44,7 @@ public class JavaCodeTest {
         return code.toString();
     }
 
-    String getSimleCodeWithSyntax(){
+    String getSimpleCodeWithSyntax(){
         StringBuilder code = new StringBuilder();
         code.append("package org.apache.dubbo.common.compiler.support;");
 
@@ -57,7 +57,7 @@ public class JavaCodeTest {
     }
 
     // only used for javassist
-    String getSimleCodeWithSyntax0(){
+    String getSimpleCodeWithSyntax0(){
         StringBuilder code = new StringBuilder();
         code.append("package org.apache.dubbo.common.compiler.support;");
 

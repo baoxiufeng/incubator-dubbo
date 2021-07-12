@@ -22,11 +22,11 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Protocol;
 import org.apache.dubbo.rpc.ProxyFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProtocolTest {
 
@@ -35,10 +35,6 @@ public class ProtocolTest {
             return e;
         }
     };
-
-    static{
-        InjvmProtocol injvm = InjvmProtocol.getInjvmProtocol();
-    }
 
     ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getExtension("javassist");
 
@@ -52,7 +48,7 @@ public class ProtocolTest {
 
         Protocol InjvmProtocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension("injvm");
 
-        assertEquals(0,InjvmProtocol.getDefaultPort());
+        assertEquals(0, InjvmProtocol.getDefaultPort());
 
         InjvmProtocol.export(invoker);
 
